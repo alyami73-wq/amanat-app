@@ -1,0 +1,941 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>برنامج الاعاشة</title>
+
+  <!-- مهم لـ PWA -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2563eb">
+
+  <!-- إعداد كـ Web App على الآيفون -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="برنامج الإعانة">
+
+  <!-- أيقونة التطبيق للآيفون (حطي الصورة في مجلد icons) -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <!-- ملف الـ manifest الخاص بالـ PWA -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- ملف الستايل -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <header class="top">
+      <h1>نظام الاعاشة</h1>
+
+      <!-- أزرار التنقل بين الصفحات -->
+      <nav class="nav">
+        <button onclick="showPage('mainPage')">1- الصفحة الرئيسية</button>
+        <button onclick="showPage('mealsPage')">2- صفحة الوجبات</button>
+        <button onclick="showPage('prepPage')">3- صفحة الإعداد</button>
+        <button onclick="showPage('calcPage')">4- صفحة الحسابات</button>
+        <button onclick="showPage('reportPage')">5- ملخص الوجبات</button>
+        <button onclick="showPage('monthsPage'); renderMonthsPage();">6- الأشهر المحفوظة</button>
+      </nav>
+
+      <!-- شريط حفظ الأشهر + المبلغ المتبقي الكلي -->
+      <div class="saved-bar">
+        <button class="secondary-btn small" id="saveMonthBtn">💾 حفظ بيانات هذا الشهر</button>
+
+        <select id="savedMonthsSelect">
+          <option value="">لا توجد أشهر محفوظة بعد</option>
+        </select>
+
+        <button class="secondary-btn small" id="loadMonthBtn">استرجاع الشهر المحدد</button>
+        <button class="secondary-btn small" id="updateMonthBtn">✏ تعديل الشهر المحدد</button>
+        <button class="secondary-btn small danger" id="deleteMonthBtn">🗑 حذف الشهر المحدد</button>
+
+        <span class="remaining-box">
+          إجمالي المبلغ المتبقي للأشهر المحفوظة:
+          <span id="globalRemaining">0.00</span> ر.س
+        </span>
+      </div>
+    </header>
+
+    <!-- 1- الصفحة الرئيسية -->
+    <section id="mainPage" class="page">
+      <h2>1- الصفحة الرئيسية</h2>
+      <div class="card">
+        <div class="form-row">
+          <label for="monthSelect">الشهر الميلادي (يكون فيه جميع الأشهر)</label>
+          <select id="monthSelect">
+            <option value="">-- اختر الشهر --</option>
+            <option value="يناير">يناير</option>
+            <option value="فبراير">فبراير</option>
+            <option value="مارس">مارس</option>
+            <option value="أبريل">أبريل</option>
+            <option value="مايو">مايو</option>
+            <option value="يونيو">يونيو</option>
+            <option value="يوليو">يوليو</option>
+            <option value="أغسطس">أغسطس</option>
+            <option value="سبتمبر">سبتمبر</option>
+            <option value="أكتوبر">أكتوبر</option>
+            <option value="نوفمبر">نوفمبر</option>
+            <option value="ديسمبر">ديسمبر</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="availableAmount">المبلغ المتوفر (ر.س)</label>
+          <input type="number" id="availableAmount" min="0" step="0.01">
+        </div>
+
+        <div class="form-row two-cols">
+          <div>
+            <label for="dateFrom">التاريخ من</label>
+            <input type="date" id="dateFrom">
+          </div>
+          <div>
+            <label for="dateTo">التاريخ إلى</label>
+            <input type="date" id="dateTo">
+          </div>
+        </div>
+
+        <button id="saveMainBtn" class="primary-btn">حفظ بيانات الصفحة الرئيسية</button>
+      </div>
+    </section>
+
+    <!-- 2- صفحة الوجبات -->
+    <section id="mealsPage" class="page hidden">
+      <h2>2- صفحة الوجبات</h2>
+      <button class="secondary-btn back-btn" onclick="showPage('mainPage')">⬅ رجوع للصفحة الرئيسية</button>
+
+      <div class="card">
+        <div class="form-row three-cols">
+          <div>
+            <label for="mealDate">التاريخ بالميلادي</label>
+            <input type="date" id="mealDate">
+          </div>
+          <div>
+            <label for="mealCount">عدد الوجبات</label>
+            <input type="number" id="mealCount" min="0">
+          </div>
+          <div>
+            <label for="mealCost">تكلفة الوجبة (ر.س) (ثابتة)</label>
+            <input type="number" id="mealCost" value="28" disabled>
+          </div>
+        </div>
+        <button id="addMealBtn" class="primary-btn">إضافة الوجبة</button>
+
+        <h3>الوجبات المسجلة</h3>
+        <div class="table-wrapper">
+          <table id="mealsTable">
+            <thead>
+              <tr>
+                <th>التاريخ بالميلادي</th>
+                <th>عدد الوجبات</th>
+                <th>تكلفة الوجبة (ر.س)</th>
+                <th>المجموع (عدد الوجبات × تكلفة الوجبة)</th>
+                <th>تعديل</th>
+                <th>حذف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- يتم الإضافة هنا -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3- صفحة الإعداد -->
+    <section id="prepPage" class="page hidden">
+      <h2>3- صفحة الإعداد</h2>
+      <button class="secondary-btn back-btn" onclick="showPage('mainPage')">⬅ رجوع للصفحة الرئيسية</button>
+
+      <div class="card">
+        <div class="form-row">
+          <label>التاريخ المسجّل في صفحة الوجبات (آخر تاريخ تم إدخاله):</label>
+          <div class="value-box" id="prepDate">-</div>
+        </div>
+
+        <div class="form-row">
+          <label>عدد الوجبات التي تم تسجيلها في صفحة الوجبات:</label>
+          <div class="value-box" id="prepMealsCount">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4- صفحة الحسابات -->
+    <section id="calcPage" class="page hidden">
+      <h2>4- صفحة الحسابات</h2>
+      <button class="secondary-btn back-btn" onclick="showPage('mainPage')">⬅ رجوع للصفحة الرئيسية</button>
+
+      <div class="card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>المبلغ المتوفر المسجّل في الصفحة الرئيسية (ر.س)</th>
+                <th>مجموع عدد الوجبات</th>
+                <th>السعر الإجمالي لعدد تكلفة الوجبات (ر.س)</th>
+                <th>المبلغ المتبقي من المبلغ المقرّر (ر.س)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="calcAvailable">0.00</td>
+                <td id="calcTotalMeals">0</td>
+                <td id="calcTotalCost">0.00</td>
+                <td id="calcRemaining">0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5- ملخص الوجبات -->
+    <section id="reportPage" class="page hidden">
+      <h2>5- ملخص الوجبات</h2>
+      <button class="secondary-btn back-btn" onclick="showPage('mainPage')">⬅ رجوع للصفحة الرئيسية</button>
+
+      <div class="card report">
+        <p class="report-title">
+          إعاشة شهر
+          <span id="reportMonth">________</span>
+          من
+          <span id="reportFrom">________</span>
+          إلى
+          <span id="reportTo">________</span>
+          بنجران
+        </p>
+
+        <div class="table-wrapper">
+          <table id="reportTable">
+            <thead>
+              <tr>
+                <th>التاريخ بالميلادي</th>
+                <th>عدد الوجبات</th>
+                <th>تكلفة الوجبة (ر.س)</th>
+                <th>المجموع (يتم ضرب تكلفة الوجبة في عدد الوجبات) (ر.س)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- الصفوف من الجافاسكربت -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">المجموع الكلي (بعد جمع المجموع لكل وجبة) ر.س:</td>
+                <td id="reportTotal">0.00</td>
+              </tr>
+              <tr>
+                <td colspan="3">المجموع الكلي (سعر المجموع كتابة) ر.س:</td>
+                <td id="reportTotalWords">صفر ريال</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <button class="primary-btn" onclick="window.print()">طباعة الملخص (PDF)</button>
+      </div>
+    </section>
+
+    <!-- 6- صفحة الأشهر المحفوظة -->
+    <section id="monthsPage" class="page hidden">
+      <h2>6- الأشهر المحفوظة</h2>
+      <button class="secondary-btn back-btn" onclick="showPage('mainPage')">⬅ رجوع للصفحة الرئيسية</button>
+
+      <div class="card months-card">
+        <div class="table-wrapper">
+          <table id="monthsTable">
+            <thead>
+              <tr>
+                <th>الشهر</th>
+                <th>الفترة</th>
+                <th>مجموع عدد الوجبات</th>
+                <th>إجمالي تكلفة الوجبات (ر.س)</th>
+                <th>المبلغ المتبقي (ر.س)</th>
+                <th>تعديل</th>
+                <th>تفاصيل</th>
+                <th>حذف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- تعبئة تلقائية -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- صفحة تفاصيل الشهر المحفوظ -->
+    <section id="monthDetailsPage" class="page hidden">
+      <h2>تفاصيل الشهر المحفوظ</h2>
+      <button class="secondary-btn back-btn" onclick="showPage('monthsPage')">⬅ رجوع لصفحة الأشهر</button>
+
+      <div class="card month-details-card">
+        <p class="month-details-header">
+          شهر <span id="mdMonth">___</span>
+          من <span id="mdFrom">___</span>
+          إلى <span id="mdTo">___</span>
+        </p>
+        <p class="month-details-meta">
+          المبلغ المتوفر: <span id="mdAmount">0.00</span> ر.س
+          &nbsp;|&nbsp;
+          المبلغ المتبقي: <span id="mdRemaining">0.00</span> ر.س
+        </p>
+
+        <div class="table-wrapper">
+          <table id="monthDetailsTable">
+            <thead>
+              <tr>
+                <th>التاريخ بالميلادي</th>
+                <th>عدد الوجبات</th>
+                <th>تكلفة الوجبة (ر.س)</th>
+                <th>المجموع (ر.س)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- تعبئة تلقائية -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">المجموع الكلي لهذا الشهر (ر.س):</td>
+                <td id="mdTotal">0.00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- الجافاسكربت داخل نفس الملف -->
+  <script>
+    const STORAGE_KEY = "amanatAidData";
+    const MEAL_COST = 28; // تكلفة ثابتة لكل وجبة
+
+    let mainData = { month: "", amount: 0, from: "", to: "" };
+    let meals = [];
+    let savedMonths = [];
+
+    function showPage(pageId) {
+      const pages = document.querySelectorAll(".page");
+      pages.forEach(p => p.classList.add("hidden"));
+      document.getElementById(pageId).classList.remove("hidden");
+    }
+
+    function saveToStorage() {
+      const data = { mainData, meals, savedMonths };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function computeRemainingForMonth(md, mealsArr) {
+      const totalCost = (mealsArr || []).reduce((sum, m) => sum + (m.total || 0), 0);
+      return (md.amount || 0) - totalCost;
+    }
+
+    // إجمالي المبلغ المتبقي = ميزانية أول شهر محفوظ - مجموع مصاريف كل الأشهر
+    function updateGlobalRemaining() {
+      const span = document.getElementById("globalRemaining");
+      if (!span) return;
+
+      if (!savedMonths.length) {
+        span.textContent = "0.00";
+        return;
+      }
+
+      const base = parseFloat(savedMonths[0].mainData?.amount) || 0;
+
+      let totalSpent = 0;
+      savedMonths.forEach(m => {
+        (m.meals || []).forEach(meal => {
+          const t = meal.total != null
+            ? parseFloat(meal.total)
+            : (parseFloat(meal.cost || 0) * parseFloat(meal.count || 0));
+          totalSpent += isNaN(t) ? 0 : t;
+        });
+      });
+
+      const remaining = base - totalSpent;
+      span.textContent = remaining.toFixed(2);
+    }
+
+    function refreshSavedMonthsSelect() {
+      const select = document.getElementById("savedMonthsSelect");
+      select.innerHTML = "";
+      if (!savedMonths.length) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "لا توجد أشهر محفوظة بعد";
+        select.appendChild(opt);
+        updateGlobalRemaining();
+        renderMonthsPage();
+        return;
+      }
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = "-- اختر شهر محفوظ --";
+      select.appendChild(first);
+
+      savedMonths.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = m.label;
+        select.appendChild(opt);
+      });
+
+      updateGlobalRemaining();
+      renderMonthsPage();
+    }
+
+    function loadFromStorage() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        refreshSavedMonthsSelect();
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        if (data.mainData) mainData = data.mainData;
+        if (Array.isArray(data.meals)) meals = data.meals;
+        if (Array.isArray(data.savedMonths)) savedMonths = data.savedMonths;
+      } catch (e) {
+        console.error(e);
+      }
+
+      document.getElementById("monthSelect").value = mainData.month || "";
+      document.getElementById("availableAmount").value = mainData.amount || "";
+      document.getElementById("dateFrom").value = mainData.from || "";
+      document.getElementById("dateTo").value = mainData.to || "";
+
+      renderMealsTable();
+      updatePrepPage();
+      updateCalculations();
+      updateReportHeader();
+      updateReportTable();
+      refreshSavedMonthsSelect();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const saveMainBtn = document.getElementById("saveMainBtn");
+      const addMealBtn = document.getElementById("addMealBtn");
+      const saveMonthBtn = document.getElementById("saveMonthBtn");
+      const loadMonthBtn = document.getElementById("loadMonthBtn");
+      const updateMonthBtn = document.getElementById("updateMonthBtn");
+      const deleteMonthBtn = document.getElementById("deleteMonthBtn");
+      const savedMonthsSelect = document.getElementById("savedMonthsSelect");
+
+      // حفظ بيانات الصفحة الرئيسية
+      saveMainBtn.addEventListener("click", () => {
+        const month = document.getElementById("monthSelect").value;
+        const amount = parseFloat(document.getElementById("availableAmount").value) || 0;
+        const from = document.getElementById("dateFrom").value;
+        const to = document.getElementById("dateTo").value;
+
+        if (!month || !amount || !from || !to) {
+          alert("الرجاء تعبئة جميع بيانات الصفحة الرئيسية.");
+          return;
+        }
+
+        mainData = { month, amount, from, to };
+        updateCalculations();
+        updatePrepPage();
+        updateReportHeader();
+        saveToStorage();
+        alert("تم حفظ بيانات الصفحة الرئيسية بنجاح ✅");
+        showPage("mealsPage");
+      });
+
+      // إضافة وجبة
+      addMealBtn.addEventListener("click", () => {
+        const dateInput = document.getElementById("mealDate");
+        const date = dateInput.value;
+        const count = parseInt(document.getElementById("mealCount").value) || 0;
+
+        if (!date) {
+          alert("الرجاء إدخال التاريخ أول مرة، ثم لن تحتاجي لتغييره إلا عند تغيير اليوم.");
+          return;
+        }
+
+        if (count <= 0) {
+          alert("الرجاء إدخال عدد الوجبات بشكل صحيح.");
+          return;
+        }
+
+        const cost = MEAL_COST;
+        const total = count * cost;
+
+        meals.push({ date, count, cost, total });
+
+        document.getElementById("mealCount").value = "";
+
+        renderMealsTable();
+        updatePrepPage();
+        updateCalculations();
+        updateReportTable();
+        saveToStorage();
+      });
+
+      // حفظ الشهر في السجل + تفريغ الشاشة
+      saveMonthBtn.addEventListener("click", () => {
+        if (!mainData.month) {
+          alert("أولاً احفظ بيانات الصفحة الرئيسية وحددي الشهر.");
+          return;
+        }
+
+        const id = Date.now();
+        const label = `${mainData.month} (${mainData.from || ""} - ${mainData.to || ""})`;
+        const copyMeals = JSON.parse(JSON.stringify(meals));
+        const remaining = computeRemainingForMonth(mainData, copyMeals);
+
+        savedMonths.push({
+          id,
+          label,
+          mainData: { ...mainData },
+          meals: copyMeals,
+          remaining
+        });
+
+        saveToStorage();
+        refreshSavedMonthsSelect();
+        alert("تم حفظ بيانات هذا الشهر في السجل ✅\nسيتم الآن تجهيز الشاشة لشهر جديد.");
+
+        mainData = { month: "", amount: 0, from: "", to: "" };
+        meals = [];
+
+        document.getElementById("monthSelect").value = "";
+        document.getElementById("availableAmount").value = "";
+        document.getElementById("dateFrom").value = "";
+        document.getElementById("dateTo").value = "";
+        document.getElementById("mealDate").value = "";
+        document.getElementById("mealCount").value = "";
+
+        renderMealsTable();
+        updatePrepPage();
+        updateCalculations();
+        updateReportHeader();
+        updateReportTable();
+        saveToStorage();
+        showPage("mainPage");
+      });
+
+      // استرجاع شهر محفوظ
+      loadMonthBtn.addEventListener("click", () => {
+        const id = savedMonthsSelect.value;
+        if (!id) {
+          alert("الرجاء اختيار شهر محفوظ أولاً.");
+          return;
+        }
+        const monthData = savedMonths.find(m => m.id.toString() === id);
+        if (!monthData) {
+          alert("تعذر العثور على بيانات هذا الشهر.");
+          return;
+        }
+
+        mainData = monthData.mainData || mainData;
+        meals = monthData.meals || [];
+
+        document.getElementById("monthSelect").value = mainData.month || "";
+        document.getElementById("availableAmount").value = mainData.amount || "";
+        document.getElementById("dateFrom").value = mainData.from || "";
+        document.getElementById("dateTo").value = mainData.to || "";
+        document.getElementById("mealDate").value = "";
+        document.getElementById("mealCount").value = "";
+
+        renderMealsTable();
+        updatePrepPage();
+        updateCalculations();
+        updateReportHeader();
+        updateReportTable();
+        saveToStorage();
+        alert("تم استرجاع بيانات الشهر المحدد ✅");
+        showPage("mainPage");
+      });
+
+      // ✏ تعديل الشهر نفسه (من الشريط العلوي)
+      updateMonthBtn.addEventListener("click", () => {
+        const id = savedMonthsSelect.value;
+        if (!id) {
+          alert("الرجاء اختيار شهر محفوظ أولاً لتعديله.");
+          return;
+        }
+        const index = savedMonths.findIndex(m => m.id.toString() === id);
+        if (index === -1) {
+          alert("تعذر العثور على بيانات هذا الشهر.");
+          return;
+        }
+
+        if (!confirm("سيتم تحديث بيانات الشهر المحدد حسب ما هو موجود الآن في الصفحات، هل أنت متأكدة؟")) return;
+
+        const label = `${mainData.month} (${mainData.from || ""} - ${mainData.to || ""})`;
+        const copyMeals = JSON.parse(JSON.stringify(meals));
+        const remaining = computeRemainingForMonth(mainData, copyMeals);
+
+        savedMonths[index].label = label;
+        savedMonths[index].mainData = { ...mainData };
+        savedMonths[index].meals = copyMeals;
+        savedMonths[index].remaining = remaining;
+
+        saveToStorage();
+        refreshSavedMonthsSelect();
+        alert("تم تعديل بيانات الشهر المحدد بنجاح ✅");
+      });
+
+      // حذف شهر محفوظ من الشريط العلوي
+      deleteMonthBtn.addEventListener("click", () => {
+        const id = savedMonthsSelect.value;
+        if (!id) {
+          alert("الرجاء اختيار شهر محفوظ أولاً لحذفه.");
+          return;
+        }
+        deleteSavedMonth(Number(id));
+      });
+
+      // تحميل بيانات قديمة
+      loadFromStorage();
+    });
+
+    // جدول الوجبات مع أزرار تعديل/حذف
+    function renderMealsTable() {
+      const tbody = document.querySelector("#mealsTable tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      meals.forEach((meal, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${meal.date}</td>
+          <td>${meal.count}</td>
+          <td>${meal.cost.toFixed(2)}</td>
+          <td>${meal.total.toFixed(2)}</td>
+          <td><button class="edit-btn small-btn" onclick="editMeal(${index})">✏ تعديل</button></td>
+          <td><button class="delete-btn small-btn" onclick="deleteMeal(${index})">🗑 حذف</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editMeal(index) {
+      const meal = meals[index];
+
+      const newDate = prompt("تعديل التاريخ:", meal.date);
+      if (!newDate) return;
+
+      const newCount = parseInt(prompt("تعديل عدد الوجبات:", meal.count));
+      if (isNaN(newCount) || newCount <= 0) {
+        alert("عدد الوجبات غير صحيح");
+        return;
+      }
+
+      meals[index].date = newDate;
+      meals[index].count = newCount;
+      meals[index].total = newCount * MEAL_COST;
+
+      renderMealsTable();
+      updatePrepPage();
+      updateCalculations();
+      updateReportTable();
+      saveToStorage();
+
+      alert("تم تعديل الوجبة بنجاح ✅");
+    }
+
+    function deleteMeal(index) {
+      if (!confirm("هل تريدين حذف هذه الوجبة؟")) return;
+      meals.splice(index, 1);
+      renderMealsTable();
+      updatePrepPage();
+      updateCalculations();
+      updateReportTable();
+      saveToStorage();
+    }
+
+    function updatePrepPage() {
+      const prepDate = document.getElementById("prepDate");
+      const prepMealsCount = document.getElementById("prepMealsCount");
+      if (!prepDate || !prepMealsCount) return;
+
+      if (!meals.length) {
+        prepDate.textContent = "-";
+        prepMealsCount.textContent = "0";
+      } else {
+        const lastMeal = meals[meals.length - 1];
+        prepDate.textContent = lastMeal.date;
+        prepMealsCount.textContent = meals.length.toString();
+      }
+    }
+
+    function updateCalculations() {
+      const calcAvailable = document.getElementById("calcAvailable");
+      const calcTotalMeals = document.getElementById("calcTotalMeals");
+      const calcTotalCost = document.getElementById("calcTotalCost");
+      const calcRemaining = document.getElementById("calcRemaining");
+      if (!calcAvailable) return;
+
+      const totalMeals = meals.reduce((sum, m) => sum + m.count, 0);
+      const totalCost = meals.reduce((sum, m) => sum + m.total, 0);
+
+      calcAvailable.textContent = mainData.amount.toFixed(2);
+      calcTotalMeals.textContent = totalMeals;
+      calcTotalCost.textContent = totalCost.toFixed(2);
+      const remaining = mainData.amount - totalCost;
+      calcRemaining.textContent = remaining.toFixed(2);
+
+      if (mainData.month) {
+        savedMonths.forEach(m => {
+          if (m.mainData &&
+              m.mainData.month === mainData.month &&
+              m.mainData.from === mainData.from &&
+              m.mainData.to === mainData.to) {
+            m.remaining = remaining;
+          }
+        });
+        saveToStorage();
+        updateGlobalRemaining();
+      }
+    }
+
+    function updateReportHeader() {
+      const m = document.getElementById("reportMonth");
+      const f = document.getElementById("reportFrom");
+      const t = document.getElementById("reportTo");
+      if (!m) return;
+
+      m.textContent = mainData.month || "________";
+      f.textContent = mainData.from || "________";
+      t.textContent = mainData.to || "________";
+    }
+
+    // تحويل رقم إلى كتابة عربية بسيطة (حتى 999999)
+    function numberToArabicWords(num) {
+      num = Math.round(num);
+      if (num === 0) return "صفر ريال";
+
+      const ones = ["", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة"];
+      const tens = ["", "عشرة", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
+      const teens = ["", "أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر", "تسعة عشر"];
+      const hundredsWords = ["", "مئة", "مئتان", "ثلاثمئة", "أربعمئة", "خمسمئة", "ستمئة", "سبعمئة", "ثمانمئة", "تسعمئة"];
+
+      function threeDigitsToWords(n) {
+        let result = [];
+        const hundreds = Math.floor(n / 100);
+        const rest = n % 100;
+        if (hundreds) result.push(hundredsWords[hundreds]);
+        if (rest > 10 && rest < 20) {
+          result.push(teens[rest - 10]);
+        } else {
+          const t = Math.floor(rest / 10);
+          const o = rest % 10;
+          if (o) result.push(ones[o]);
+          if (t) result.push(tens[t]);
+        }
+        return result.join(" و ");
+      }
+
+      let parts = [];
+      const thousands = Math.floor(num / 1000);
+      const remainder = num % 1000;
+
+      if (thousands) {
+        if (thousands === 1) {
+          parts.push("ألف");
+        } else if (thousands === 2) {
+          parts.push("ألفان");
+        } else if (thousands >= 3 && thousands <= 10) {
+          parts.push(threeDigitsToWords(thousands) + " آلاف");
+        } else {
+          parts.push(threeDigitsToWords(thousands) + " ألف");
+        }
+      }
+
+      if (remainder) {
+        const words = threeDigitsToWords(remainder);
+        if (words) parts.push(words);
+      }
+
+      return parts.join(" و ") + " ريال";
+    }
+
+    function updateReportTable() {
+      const tbody = document.querySelector("#reportTable tbody");
+      const reportTotal = document.getElementById("reportTotal");
+      const reportTotalWords = document.getElementById("reportTotalWords");
+      if (!tbody || !reportTotal) return;
+
+      tbody.innerHTML = "";
+      let totalAll = 0;
+
+      meals.forEach(meal => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${meal.date}</td>
+          <td>${meal.count}</td>
+          <td>${meal.cost.toFixed(2)}</td>
+          <td>${meal.total.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+        totalAll += meal.total;
+      });
+
+      reportTotal.textContent = totalAll.toFixed(2);
+      if (reportTotalWords) {
+        reportTotalWords.textContent = numberToArabicWords(totalAll);
+      }
+    }
+
+    // صفحة الأشهر المحفوظة
+    function renderMonthsPage() {
+      const tbody = document.querySelector("#monthsTable tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (!savedMonths.length) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="8" style="text-align:center;">لا توجد أشهر محفوظة حالياً</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      savedMonths.forEach(m => {
+        const md = m.mainData || {};
+        const mealsArr = m.meals || [];
+        const totalMeals = mealsArr.reduce((s, x) => s + (x.count || 0), 0);
+        const totalCost = mealsArr.reduce((s, x) => {
+          const t = x.total != null ? x.total : (x.cost || 0) * (x.count || 0);
+          return s + t;
+        }, 0);
+        const remaining = (typeof m.remaining === "number")
+          ? m.remaining
+          : computeRemainingForMonth(md, mealsArr);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${md.month || ""}</td>
+          <td>${(md.from || "")} - ${(md.to || "")}</td>
+          <td>${totalMeals}</td>
+          <td>${totalCost.toFixed(2)}</td>
+          <td>${remaining.toFixed(2)}</td>
+          <td><button class="edit-btn small-btn" onclick="editSavedMonth(${m.id})">✏ تعديل</button></td>
+          <td><button class="details-btn small-btn" onclick="viewMonthDetails(${m.id})">📄 تفاصيل</button></td>
+          <td><button class="delete-btn small-btn" onclick="deleteSavedMonth(${m.id})">🗑 حذف</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // حذف شهر محفوظ (تُستخدم من الزر العلوي ومن جدول الأشهر)
+    function deleteSavedMonth(id) {
+      const index = savedMonths.findIndex(m => m.id === id);
+      if (index === -1) {
+        alert("تعذر العثور على بيانات هذا الشهر.");
+        return;
+      }
+      if (!confirm("هل تريدين حذف هذا الشهر نهائياً؟")) return;
+
+      savedMonths.splice(index, 1);
+      saveToStorage();
+      refreshSavedMonthsSelect();
+      alert("تم حذف الشهر بنجاح ✅");
+    }
+
+    // تعديل شهر من صف الجدول
+    function editSavedMonth(id) {
+      const monthData = savedMonths.find(m => m.id === id);
+      if (!monthData) {
+        alert("تعذر العثور على بيانات هذا الشهر.");
+        return;
+      }
+
+      mainData = monthData.mainData || mainData;
+      meals = monthData.meals || [];
+
+      document.getElementById("monthSelect").value = mainData.month || "";
+      document.getElementById("availableAmount").value = mainData.amount || "";
+      document.getElementById("dateFrom").value = mainData.from || "";
+      document.getElementById("dateTo").value = mainData.to || "";
+      document.getElementById("mealDate").value = "";
+      document.getElementById("mealCount").value = "";
+
+      renderMealsTable();
+      updatePrepPage();
+      updateCalculations();
+      updateReportHeader();
+      updateReportTable();
+      saveToStorage();
+
+      const select = document.getElementById("savedMonthsSelect");
+      if (select) select.value = String(id);
+
+      alert("تم فتح بيانات هذا الشهر للتعديل.\nعدّلي البيانات ثم اضغطي زر \"تعديل الشهر المحدد\" في الأعلى لحفظ التغييرات ✅");
+      showPage("mainPage");
+    }
+
+    // عرض تفاصيل شهر في صفحة خاصة
+    function viewMonthDetails(id) {
+      const monthData = savedMonths.find(m => m.id === id);
+      if (!monthData) {
+        alert("تعذر العثور على بيانات هذا الشهر.");
+        return;
+      }
+
+      const md = monthData.mainData || {};
+      const mealsArr = monthData.meals || [];
+      const remaining = (typeof monthData.remaining === "number")
+        ? monthData.remaining
+        : computeRemainingForMonth(md, mealsArr);
+
+      const spanMonth = document.getElementById("mdMonth");
+      const spanFrom = document.getElementById("mdFrom");
+      const spanTo = document.getElementById("mdTo");
+      const spanAmount = document.getElementById("mdAmount");
+      const spanRemaining = document.getElementById("mdRemaining");
+      const tbody = document.querySelector("#monthDetailsTable tbody");
+      const totalCell = document.getElementById("mdTotal");
+
+      if (!tbody) return;
+
+      spanMonth.textContent = md.month || "";
+      spanFrom.textContent = md.from || "";
+      spanTo.textContent = md.to || "";
+      spanAmount.textContent = (md.amount || 0).toFixed(2);
+      spanRemaining.textContent = remaining.toFixed(2);
+
+      tbody.innerHTML = "";
+      let totalAll = 0;
+
+      mealsArr.forEach(meal => {
+        const tr = document.createElement("tr");
+        const cost = meal.cost != null ? meal.cost : MEAL_COST;
+        const total = meal.total != null ? meal.total : cost * (meal.count || 0);
+        tr.innerHTML = `
+          <td>${meal.date}</td>
+          <td>${meal.count}</td>
+          <td>${cost.toFixed(2)}</td>
+          <td>${total.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+        totalAll += total;
+      });
+
+      totalCell.textContent = totalAll.toFixed(2);
+
+      showPage("monthDetailsPage");
+    }
+  </script>
+
+  <!-- تسجيل Service Worker عشان يصير PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => {
+            console.log('Service Worker مسجل ✔️', reg.scope);
+          })
+          .catch(err => {
+            console.log('فشل تسجيل Service Worker ❌', err);
+          });
+      });
+    }
+  </script>
+
+</body>
+</html>

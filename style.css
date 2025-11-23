@@ -1,0 +1,371 @@
+ /* استيراد خط Tajawal */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+
+/* إعداد عام */
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  direction:rtl;
+}
+
+body{
+  font-family:"Tajawal", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-image:url("bg.jpg");   /* تأكدي أن اسم الصورة bg.jpg وفي نفس الملف */
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-attachment:fixed;
+  color:#0f172a;
+}
+
+/* الحاوية الرئيسية */
+.app{
+  max-width:1100px;
+  margin:20px auto 40px;
+  padding:0 15px;
+}
+
+/* الهيدر العلوي */
+.top{
+  background:rgba(255,255,255,.9);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 10px 25px rgba(15,23,42,.08);
+  margin-bottom:20px;
+}
+
+.top h1{
+  margin:0 0 10px;
+  font-size:26px;
+  font-weight:800;
+  text-align:center;
+  color:#0f172a;
+}
+
+/* أزرار التنقل بين الصفحات */
+.nav{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.nav button{
+  border:none;
+  padding:8px 14px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:14px;
+  background:linear-gradient(120deg,#3b82f6,#6366f1);
+  color:#fff;
+  box-shadow:0 4px 10px rgba(37,99,235,.25);
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.nav button:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 14px rgba(37,99,235,.3);
+}
+
+.nav button:active{
+  transform:translateY(0);
+  box-shadow:0 2px 6px rgba(37,99,235,.2);
+}
+
+/* شريط حفظ الأشهر */
+.saved-bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
+  margin-top:8px;
+}
+
+.saved-bar select{
+  min-width:210px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #cbd5f5;
+  font-size:13px;
+}
+
+.remaining-box{
+  background:#eff6ff;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:13px;
+  color:#1e40af;
+}
+
+/* الأزرار العامة */
+.primary-btn,
+.secondary-btn,
+.edit-btn,
+.delete-btn,
+.details-btn{
+  border:none;
+  cursor:pointer;
+  border-radius:999px;
+  font-size:14px;
+  padding:8px 14px;
+  transition:background .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.primary-btn{
+  background:linear-gradient(120deg,#2563eb,#4f46e5);
+  color:#fff;
+  box-shadow:0 5px 12px rgba(37,99,235,.25);
+}
+
+.primary-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 7px 16px rgba(37,99,235,.3);
+}
+
+.secondary-btn{
+  background:#e5e7eb;
+  color:#111827;
+}
+
+.secondary-btn:hover{
+  background:#d1d5db;
+}
+
+.secondary-btn.danger{
+  background:#fee2e2;
+  color:#b91c1c;
+}
+.secondary-btn.danger:hover{
+  background:#fecaca;
+}
+
+/* أزرار صغيرة */
+.small{
+  padding:6px 10px;
+  font-size:12px;
+}
+.small-btn{
+  padding:5px 9px;
+  font-size:12px;
+}
+
+/* أزرار خاصة بالجداول */
+.edit-btn{
+  background:#22c55e;
+  color:#fff;
+}
+.edit-btn:hover{
+  background:#16a34a;
+}
+
+.delete-btn{
+  background:#ef4444;
+  color:#fff;
+}
+.delete-btn:hover{
+  background:#dc2626;
+}
+
+.details-btn{
+  background:#0ea5e9;
+  color:#fff;
+}
+.details-btn:hover{
+  background:#0284c7;
+}
+
+.back-btn{
+  margin-bottom:10px;
+}
+
+/* الصفحات */
+.page{
+  margin-bottom:24px;
+}
+.page.hidden{
+  display:none;
+}
+
+/* الكروت */
+.card{
+  background:rgba(255,255,255,.95);
+  border-radius:18px;
+  padding:20px 18px 22px;
+  box-shadow:0 14px 30px rgba(15,23,42,.10);
+}
+
+/* عناوين الصفحات */
+.page h2{
+  margin:0 0 12px;
+  font-size:20px;
+  font-weight:700;
+  color:#111827;
+}
+
+/* صفوف النموذج */
+.form-row{
+  margin-bottom:14px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.form-row label{
+  font-size:14px;
+  color:#374151;
+}
+
+.form-row input,
+.form-row select{
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  font-size:14px;
+}
+
+/* تخطيط أعمدة */
+.two-cols{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.three-cols{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+
+/* قيمة فقط للعرض */
+.value-box{
+  background:#f9fafb;
+  border-radius:10px;
+  padding:8px 12px;
+  border:1px dashed #cbd5f5;
+  font-size:14px;
+}
+
+/* الجداول */
+.table-wrapper{
+  margin-top:16px;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+  background:#fff;
+}
+
+table thead tr{
+  background:linear-gradient(120deg,#3b82f6,#6366f1);
+  color:#fff;
+}
+
+table th,
+table td{
+  padding:10px 8px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+}
+
+table tbody tr:nth-child(even){
+  background:#f9fafb;
+}
+
+/* صفحة ملخص الوجبات */
+.report .report-title{
+  text-align:center;
+  margin-bottom:16px;
+  font-weight:600;
+  color:#111827;
+}
+
+/* صفحة الأشهر المحفوظة */
+.months-card{
+  border-top:4px solid #3b82f6;
+}
+
+/* صفحة تفاصيل شهر محفوظ */
+.month-details-card{
+  border-top:4px solid #6366f1;
+}
+
+.month-details-header{
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.month-details-meta{
+  font-size:14px;
+  color:#4b5563;
+}
+
+/* استجابة بسيطة للجوال */
+@media (max-width:768px){
+  .two-cols,
+  .three-cols{
+    grid-template-columns:1fr;
+  }
+
+  .saved-bar{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .nav{
+    justify-content:flex-start;
+  }
+
+  .nav button{
+    flex:1 1 auto;
+    text-align:center;
+  }
+}
+
+/* ===== الطباعة: إظهار ملخص الوجبات فقط ===== */
+@media print {
+
+  /* إخفاء الهيدر وشريط الأشهر وأزرار الرجوع */
+  header.top,
+  .saved-bar,
+  .nav,
+  .back-btn{
+    display:none !important;
+  }
+
+  /* إخفاء كل الصفحات */
+  .page{
+    display:none !important;
+    box-shadow:none !important;
+  }
+
+  /* إظهار صفحة الملخص فقط */
+  #reportPage{
+    display:block !important;
+  }
+
+  body{
+    background:#ffffff !important;
+    padding:0;
+  }
+
+  .card.report{
+    box-shadow:none !important;
+    border:none !important;
+    margin:0;
+  }
+
+  /* إخفاء زر طباعة الملخص داخل ورقة الطباعة */
+  #reportPage button{
+    display:none !important;
+  }
+}
